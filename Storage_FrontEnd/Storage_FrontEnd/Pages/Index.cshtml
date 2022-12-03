@@ -1,0 +1,256 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Storage";
+}
+
+<div class="col-12 mx-auto pt-0 p-0">
+    <div>
+        <div class="container border box-shadow">
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="agreementNumber">Agreement Number</label>
+                            <input class="form-control" id="agreementNumber" name="agreementNumber" type="text" value="" readonly>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="branchID">Branch ID</label>
+                            <input class="form-control" id="branchID" name="branchID" type="text" value="" placeholder="Input Branch id">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="nomorBPKB">No. BPKB</label>
+                            <input class="form-control" id="nomorBPKB" name="nomorBPKB" type="text" value="" placeholder="Input No BPKB">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="tanggalBPKBIn">Tanggal BPKB In</label>
+                            <input class="form-control" id="tanggalBPKBIn" name="tanggalBPKBIn" type="text" value="" readonly placeholder="Input Tanggal BPKB In">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="tanggalBPKB">Tanggal BPKB</label>
+                            <input class="form-control" id="tanggalBPKB" name="tanggalBPKB" type="text" value="" readonly placeholder="Input Tanggal BPKB">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="noFaktur">No. Faktur</label>
+                            <input class="form-control" id="noFaktur" name="noFaktur" type="text" value="" placeholder="Input No. Faktur">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-1" style="text-align:center;">
+                    <div style="width: 1px; background-color: black; height: 100%;  float: left;"></div>
+                </div>
+                <div class="col-md-5">
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="tanggalFaktur">Tanggal Faktur</label>
+                            <input class="form-control" id="tanggalFaktur" name="tanggalFaktur" type="text" value="" readonly placeholder="Input Tanggal Faktur">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="nomorPolisi">Nomor Polisi</label>
+                            <input class="form-control" id="nomorPolisi" name="nomorPolisi" type="text" value="" placeholder="Input Nomor Polisi">
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="lokasiPenyimpanan">Lokasi Penyimpanan</label>
+                            <select class="form-control fa fa-input" id="lokasiPenyimpanan" name="lokasiPenyimpanan" placeholder="Input Lokasi Penyimpanan"> </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+               <br />
+        </div>
+        <br /><br />
+
+     
+        <div class="row">
+            <div class="col-md-6">
+                <button type="reset" class="btn btn-warning w-100" style="border-radius:15px;" onclick="return cancelData()"><i class="fa fa-home">Cancel</i></button>&nbsp;
+            </div>
+            <div class="col-md-6">
+                <button type="submit" class="btn btn-warning w-100" style="border-radius:15px;" onclick="saveStorage();"><i class="fa fa-home">Save</i></button>
+            </div>
+        </div>
+
+    </div>
+
+
+</div>
+
+@section Scripts{
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+
+    <script>
+
+        $(function() {
+            loadDatePicker();
+            loadLokasiPenyimpanan();
+            loadLatestAgreementNumber();
+        });
+
+
+        function loadDatePicker() {
+            $("#tanggalBPKB").datepicker({ dateFormat: 'yy-mm-dd' });
+            $("#tanggalFaktur").datepicker({ dateFormat: 'yy-mm-dd' });
+            $("#tanggalBPKBIn").datepicker({ dateFormat: 'yy-mm-dd' });
+        }
+
+        function loadLokasiPenyimpanan() {
+            _fw_get('https://localhost:7176/api/MsStorageLocations', null, function(res) {
+                if (res) {
+                    console.log(res);
+                    _fw_populateCombo($('#lokasiPenyimpanan'), res, 'locationId', 'locationName');
+                } else {
+
+                }
+            })
+                .fail(function() {
+
+                });
+        }
+
+        function loadLatestAgreementNumber() {
+            _fw_get('https://localhost:7176/GetAgreementNumber', null, function(res) {
+                if (res) {
+                    $('#agreementNumber').val(res);
+                } else {
+                    //harus message
+                }
+            })
+                .fail(function() {
+                    //harus message
+                });
+        }
+
+        function saveStorage() {
+            doAdd();
+        }
+
+        function doAdd() {
+            const tanggalBPKB = new Date($('#tanggalBPKB').val());
+            const tanggalFaktur = new Date($('#tanggalFaktur').val());
+            const tanggalBPKBIn = new Date($('#tanggalBPKBIn').val());
+            let data = {
+                "agreementNumber": $('#agreementNumber').val(),
+                "bpkbNo": $('#nomorBPKB').val(),
+                "branchId": $('#branchID').val(),
+                "bpkbDate": tanggalBPKB.toISOString(),
+                "fakturNo": $('#noFaktur').val(),
+                "fakturDate": tanggalFaktur.toISOString(),
+                "locationId": $('#lokasiPenyimpanan').val(),
+                "policeNo": $('nomorPolisi').val(),
+                "bpkbDateOn": tanggalBPKBIn.toISOString(),
+            }
+            _fw_post('https://localhost:7176/api/TrBpkbs', data, function(res) {
+                if (res) {
+                    alert("Data telah sukses tersimpan !");
+                    location.reload();
+                } else {
+                    //harus message
+                }
+
+            })
+                .fail(function() {
+                    //harus message
+                });
+        }
+
+        function cancelData() {
+            doClear();
+            return true;
+        }
+
+        function doClear() {
+
+            $("#tanggalBPKB").val("");
+            $("#tanggalFaktur").val("");
+            $("#tanggalBPKBIn").val("");
+
+
+            $('#agreementNumber').val("");
+            $('#nomorBPKB').val("");
+            $('#branchID').val("");
+            $('#noFaktur').val("");
+            $('#nomorPolisi').val("");
+            $('#lokasiPenyimpanan').val("0");
+        }
+
+        function _fw_post(url, data, callback, callError) {
+            return $.ajax({
+                url: url,
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify(data),
+                success: function(res, statusCode, xhr) {
+                    if (typeof callback === 'function') {
+                        callback(res, statusCode, xhr);
+                    }
+                },
+                error: function(xhr, statusCode, errorThrown) {
+                    if (typeof callError === 'function') {
+                        callError(xhr, statusCode, errorThrown);
+                    }
+                }
+            })
+        }
+
+        function _fw_get(url, data, callback, callError) {
+            return $.ajax({
+                url: url,
+                type: 'GET',
+                contentType: 'application/json',
+                data: (data),
+                success: function(res, statusCode, xhr) {
+                    console.log(res);
+                    if (typeof callback === 'function') {
+                        callback(res, statusCode, xhr);
+                    }
+                },
+                error: function(xhr, statusCode, errorThrown) {
+                    if (typeof callError === 'function') {
+                        callError(xhr, statusCode, errorThrown);
+                    }
+                }
+            })
+        }
+
+        function _fw_populateCombo(selectObj, arr, textOpt, valOpt, label) {
+            if (!label) label = '- Silahkan Pilih -';
+            var key, val, options = ['<option value="" disabled>' + label + '</option>'];
+            if (!textOpt && !valOpt) {
+                return selectObj.html(options.concat($.map(arr, function(idx, elm) {
+                    return '<option value="' + elm + '">' + elm + '</option>';
+                }).join('')));
+            } else if (textOpt && !valOpt) {
+                key = textOpt;
+                val = textOpt;
+            } else {
+                key = textOpt;
+                val = valOpt;
+            }
+            return selectObj.html(options.concat($.map(arr, function(elm, idx) {
+                return '<option value="' + elm[key] + '">' + elm[val] + '</option>';
+            }).join('')));
+        }
+
+    </script>
+
+}
